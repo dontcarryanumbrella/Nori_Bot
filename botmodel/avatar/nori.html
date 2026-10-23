@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nori</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #DCDBD6; font-family: "Segoe UI", system-ui, sans-serif; user-select: none; }
+  body { display: flex; flex-direction: column; }
+  #stage { flex: 1; min-height: 0; position: relative; }
+  #stage svg { width: 100%; height: 100%; display: block; }
+  .hit { cursor: pointer; }
+  #caption { position: absolute; left: 12px; right: 12px; top: 10px; text-align: center; font-size: 13px; line-height: 1.35; color: #2C2C2A; transition: opacity .4s; }
+  #caption.you { color: #5F5E5A; font-style: italic; }
+  #stop { display: none; margin: 6px auto 0; font: inherit; font-size: 12px; padding: 2px 10px; border: 1px solid #888780; border-radius: 6px; background: transparent; color: #2C2C2A; cursor: pointer; }
+  body.talking #stop { display: block; }
+  #bar { display: flex; padding: 6px; gap: 6px; background: #CFCEC8; }
+  #cmd { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid #B4B2A9; border-radius: 6px; background: #F1EFE8; color: #2C2C2A; outline: none; }
+  #cmd:focus { border-color: #5F5E5A; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg viewBox="0 -30 300 310" preserveAspectRatio="xMidYMax meet" aria-label="Nori the cat">
+    <defs>
+      <filter id="rough" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence id="turb" type="fractalNoise" baseFrequency="0.032" numOctaves="3" seed="1" result="n"/>
+        <feDisplacementMap id="disp" in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+    <g id="root"><g filter="url(#rough)">
+      <path id="tail" class="hit" d="M118 250 C 78 252, 66 214, 88 200 C 100 192, 98 178, 86 174" fill="none" stroke="#111" stroke-width="14" stroke-linecap="round"/>
+      <path id="body" class="hit" d="M132 148 C 128 195, 112 236, 118 256 Q 150 266 184 256 C 188 236, 172 195, 168 148 Z" fill="#111"/>
+      <path d="M131 150 C 126 196, 110 237, 116 258" fill="none" stroke="#111" stroke-width="1.5" opacity="0.6" pointer-events="none"/>
+      <polygon id="earL" class="hit" points="104,98 110,54 136,82" fill="#111"/>
+      <polygon id="earR" class="hit" points="196,98 190,54 164,82" fill="#111"/>
+      <ellipse id="head" class="hit" cx="150" cy="116" rx="54" ry="43" fill="#111"/>
+      <g pointer-events="none">
+        <ellipse cx="150" cy="117" rx="56" ry="44" fill="none" stroke="#111" stroke-width="1.5" opacity="0.5"/>
+        <g id="eyesOpen">
+          <g id="eyeL"><circle r="15" fill="#111" stroke="#F4F4F2" stroke-width="3.5"/><circle r="16.5" fill="none" stroke="#F4F4F2" stroke-width="1" opacity="0.5"/><circle id="hlL" r="2.6" fill="#F4F4F2"/></g>
+          <g id="eyeR"><circle r="15" fill="#111" stroke="#F4F4F2" stroke-width="3.5"/><circle r="16.5" fill="none" stroke="#F4F4F2" stroke-width="1" opacity="0.5"/><circle id="hlR" r="2.6" fill="#F4F4F2"/></g>
+        </g>
+        <g id="eyesHappy" fill="none" stroke="#F4F4F2" stroke-width="3.5" stroke-linecap="round"><path d="M114 122 Q127 106 140 122"/><path d="M160 122 Q173 106 186 122"/></g>
+        <g id="eyesClosed" fill="none" stroke="#F4F4F2" stroke-width="3.5" stroke-linecap="round"><path d="M114 118 Q127 126 140 118"/><path d="M160 118 Q173 126 186 118"/></g>
+        <g stroke="#F4F4F2" stroke-width="3" stroke-linecap="round"><path id="browL" d="M118 95 L136 95"/><path id="browR" d="M164 95 L182 95"/></g>
+        <g fill="none" stroke="#F4F4F2" stroke-width="2.5" stroke-linecap="round">
+          <path id="mW" d="M141 138 Q145.5 145 150 139 Q154.5 145 159 138"/>
+          <path id="mFrown" d="M142 146 Q150 137 158 146"/>
+          <path id="mSmirk" d="M143 141 Q152 145 161 135"/>
+        </g>
+        <ellipse id="mO" cx="150" cy="143" rx="4.5" ry="6" fill="#F4F4F2"/>
+        <ellipse id="mTalk" cx="150" cy="141" rx="5.5" ry="4" fill="#F4F4F2"/>
+        <path id="tear" d="M122 134 Q118 141 122 144 Q126 141 122 134 Z" fill="#F4F4F2"/>
+        <g fill="#111" font-family="sans-serif"><text id="z1" x="202" y="70" font-size="16">z</text><text id="z2" x="202" y="70" font-size="20">z</text><text id="z3" x="202" y="70" font-size="13">z</text></g>
+        <text id="qm" x="208" y="72" font-size="30" fill="#111" font-family="sans-serif">?</text>
+        <g fill="none" stroke="#111" stroke-width="3" stroke-linejoin="round"><path id="h1" d="M0 4 C-8 -4 -4 -10 0 -5 C4 -10 8 -4 0 4 Z"/><path id="h2" d="M0 4 C-8 -4 -4 -10 0 -5 C4 -10 8 -4 0 4 Z"/></g>
+        <g id="anger" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"><path d="M-9 -3 Q-3 -3 -3 -9 M3 -9 Q3 -3 9 -3 M9 3 Q3 3 3 9 M-3 9 Q-3 3 -9 3"/></g>
+      </g>
+    </g></g>
+    <g id="ballG" class="hit" filter="url(#rough)" opacity="0"><circle r="10" fill="#D85A30" stroke="#111" stroke-width="2.5"/><path d="M-10 0 Q0 -6 10 0" fill="none" stroke="#111" stroke-width="2"/></g>
+  </svg>
+  <div id="caption"><span id="captionText">waking up...</span><button id="stop" type="button">Stop</button></div>
+</div>
+<form id="bar" autocomplete="off"><input id="cmd" type="text" placeholder="Say something to Nori..."></form>
+<script>
+(() => {
+  // Every pose is a set of numbers. Springs pull the current numbers toward the target,
+  // so any state blends smoothly into any other.
+  const BASE = {x:0,earL:0,earR:0,earS:1,tilt:0,sy:1,eyeR:1,open:1,px:0,py:0,happy:0,closed:0,browA:0,browO:0,mTalk:0,mFrown:0,mO:0,mSmirk:0,mW:0,tailAmp:6,tailSpd:2,tailW:14,shake:0,zzz:0,tear:0,q:0,hearts:0,anger:0,bounce:0,groove:0};
+  const EMOTIONS = {
+    neutral: {},
+    happy: {happy:1,mW:1,tailAmp:14,tailSpd:6,earS:1.06,bounce:1},
+    love: {happy:1,mW:1,hearts:1,tilt:-6,tailAmp:10,tailSpd:3,earS:1.05},
+    sad: {earL:28,earR:-28,earS:0.88,tilt:3,sy:0.93,open:0.72,py:4,browA:-16,browO:1,mFrown:1,tear:1,tailAmp:2,tailSpd:0.6,tailW:11},
+    angry: {earL:-38,earR:38,earS:0.84,browA:22,browO:1,open:0.68,eyeR:0.9,mFrown:0.7,shake:1.4,tailW:21,tailAmp:12,tailSpd:7,anger:1,sy:1.03},
+    surprised: {eyeR:1.38,open:1.08,earS:1.22,earL:-6,earR:6,mO:1,sy:1.07,tailW:19,tailAmp:2},
+    confused: {tilt:11,earL:-14,earR:16,q:1,px:-3,py:-4,mFrown:0.35,tailAmp:5,tailSpd:1.2},
+    smug: {open:0.5,px:4,py:1,browA:9,browO:0.7,mSmirk:1,tilt:-5,tailAmp:8,tailSpd:1.5},
+    playful: {earL:-8,earR:8,earS:1.1,eyeR:1.22,sy:0.96,tailAmp:16,tailSpd:8,tailW:15},
+  };
+  const SLEEP = {closed:1,open:0.05,zzz:1,sy:0.94,tailAmp:2,tailSpd:0.5,earS:0.9};
+  const VIBE = {happy:1,mW:1,groove:1,tailAmp:10,tailSpd:4};
+  const MOOD_TTL = 60;
+
+  const $ = id => document.getElementById(id);
+  const el = {};
+  ['root','tail','body','head','earL','earR','eyeL','eyeR','hlL','hlR','eyesOpen','eyesHappy','eyesClosed','browL','browR','mW','mFrown','mSmirk','mO','mTalk','tear','z1','z2','z3','qm','h1','h2','anger','turb','disp','ballG','captionText','caption','stop','bar','cmd'].forEach(id => el[id] = $(id));
+
+  const keys = Object.keys(BASE);
+  const cur = {...BASE}, vel = {};
+  let tgt = {...BASE};
+  keys.forEach(k => vel[k] = 0);
+
+  let t = 0, mood = 'neutral', moodSetAt = 0, activity = 'sleep', reaction = null, action = null, ball = null;
+  let lastFace = '', nextBlink = 2, blinkT = -1, nextPounce = 0, captionTimer = null;
+  const pats = [], pokes = [];
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  const ease = p => p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+
+  function api(name, ...args) {
+    const bridge = window.pywebview && window.pywebview.api;
+    if (bridge && bridge[name]) bridge[name](...args);
+  }
+
+  function face() {
+    if (reaction) return reaction.name;
+    if (activity === 'sleep') return 'sleep';
+    if (activity === 'vibe') return 'vibe';
+    return ball ? 'playful' : mood;
+  }
+
+  function retarget() {
+    const f = face();
+    tgt = Object.assign({}, BASE, f === 'sleep' ? SLEEP : f === 'vibe' ? VIBE : EMOTIONS[f] || {});
+    if (!reaction) {
+      if (activity === 'listen' && f === 'neutral') Object.assign(tgt, {earL:-10, earR:10, earS:1.12, eyeR:1.06});
+      if (activity === 'think') Object.assign(tgt, {px:4, py:-5, tilt:-4, tailSpd:0.8});
+    }
+    if (activity === 'talk') Object.assign(tgt, {mTalk:1, mW:0, mFrown:0, mSmirk:0, mO:0});
+    if (f !== lastFace) { vel.sy -= 1.6; vel.earS += 1.2; lastFace = f; }
+  }
+
+  function showCaption(text, isUser) {
+    clearTimeout(captionTimer);
+    el.captionText.textContent = text || '';
+    el.caption.classList.toggle('you', !!isUser);
+    el.caption.style.opacity = text ? 1 : 0;
+    if (text && (isUser || activity !== 'talk')) captionTimer = setTimeout(() => el.caption.style.opacity = 0, 4000);
+  }
+
+  function react(name, seconds, line) {
+    reaction = {name, until: t + seconds};
+    retarget();
+    if (line) showCaption(line);
+  }
+
+  function recent(list, windowSeconds) {
+    list.push(t);
+    while (list.length && t - list[0] > windowSeconds) list.shift();
+    return list.length;
+  }
+
+  function wakeIfAsleep() {
+    if (activity !== 'sleep') return false;
+    react('surprised', 1.5, 'WHO WOKE ME UP');
+    return true;
+  }
+
+  function poke(part, handler) {
+    return () => { api('poked', part); if (!wakeIfAsleep()) handler(); };
+  }
+
+  el.head.addEventListener('click', poke('head', () => {
+    if (recent(pats, 4) >= 3) react('love', 3, 'ok fine you are my favorite human');
+    else react('happy', 2, pick(['prrr... ok keep going', 'yeah right there', 'head pats are goated']));
+  }));
+  el.body.addEventListener('click', poke('body', () => {
+    if (recent(pokes, 3) >= 3) react('angry', 3, 'touch me again and see what happens');
+    else react('surprised', 1.2, pick(['excuse me??', 'personal space bro', 'why are you poking me']));
+  }));
+  el.tail.addEventListener('click', poke('tail', () => {
+    react('angry', 2.5, pick(['BRO. not the tail.', 'the tail is off limits fr', 'you did NOT just grab my tail']));
+  }));
+  el.earL.addEventListener('click', poke('ear', () => { vel.earL -= 420; showCaption('hey that tickles'); }));
+  el.earR.addEventListener('click', poke('ear', () => { vel.earR += 420; showCaption('hey that tickles'); }));
+  el.ballG.addEventListener('click', () => {
+    if (!ball) return;
+    ball.vx = (ball.x < 150 + cur.x ? -1 : 1) * (280 + Math.random() * 180);
+    ball.vy = -460;
+  });
+
+  el.bar.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = el.cmd.value.trim();
+    if (!text) return;
+    el.cmd.value = '';
+    showCaption('you: ' + text, true);
+    api('submit_text', text);
+  });
+  el.stop.addEventListener('click', () => api('interrupt'));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') api('interrupt'); });
+
+  function actionOffset() {
+    if (!action) return {y:0, r:0, s:0};
+    const duration = {backflip:1.15, spin:0.9, hop:0.75, pounce:0.45}[action.name];
+    const p = (t - action.t0) / duration;
+    if (p >= 1) { action = null; return {y:0, r:0, s:0}; }
+    if (action.name === 'backflip') {
+      if (p < .15) return {y:0, r:0, s:-0.16 * p / .15};
+      if (p < .8) { const q = (p - .15) / .65; return {y:-78 * Math.sin(Math.PI * q), r:-360 * ease(q), s:0.05}; }
+      return {y:0, r:-360, s:-0.13 * Math.sin(Math.PI * (p - .8) / .2)};
+    }
+    if (action.name === 'spin') return {y:-22 * Math.sin(Math.PI * p), r:360 * ease(p), s:0};
+    if (action.name === 'pounce') return {y:-30 * Math.sin(Math.PI * p), r:0, s:p < .2 ? -0.12 : 0.04};
+    return {y:-26 * Math.abs(Math.sin(2 * Math.PI * p)) * (1 - p * .4), r:0, s:p % .5 < .06 ? -0.08 : 0};
+  }
+
+  function stepBall(dt) {
+    if (!ball) return;
+    const ground = 252;
+    ball.vy += 900 * dt;
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+    if (ball.y > ground) { ball.y = ground; ball.vy *= -0.6; ball.vx *= 0.9; if (Math.abs(ball.vy) < 40) ball.vy = 0; }
+    if (ball.y >= ground - 0.5) ball.vx *= 1 - 1.4 * dt;
+    if (ball.x < 10) { ball.x = 10; ball.vx = -ball.vx * 0.8; }
+    if (ball.x > 290) { ball.x = 290; ball.vx = -ball.vx * 0.8; }
+    ball.rot += ball.vx * dt / 10;
+    el.ballG.setAttribute('transform', `translate(${ball.x} ${ball.y}) rotate(${ball.rot * 57.3})`);
+    if (activity === 'sleep') return;
+    tgt.x = Math.max(-95, Math.min(95, ball.x - 150));
+    const dx = ball.x - (150 + cur.x), dy = ball.y - 116, len = Math.hypot(dx, dy) || 1;
+    tgt.px = 6 * dx / len;
+    tgt.py = 6 * dy / len;
+    if (t > nextPounce && !action && Math.abs(dx) < 60 && ball.y > 205) {
+      action = {name:'pounce', t0:t};
+      nextPounce = t + 0.9;
+      const dir = dx === 0 ? pick([-1, 1]) : Math.sign(dx);
+      ball.vx = dir * (240 + Math.random() * 220);
+      ball.vy = -360 - Math.random() * 160;
+    }
+  }
+
+  setInterval(() => el.turb.setAttribute('seed', pick([1, 7, 13])), 130);
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000);
+    last = now;
+    t += dt;
+    if (reaction && t > reaction.until) { reaction = null; retarget(); }
+    if (mood !== 'neutral' && t - moodSetAt > MOOD_TTL) { mood = 'neutral'; retarget(); }
+    if (!ball) tgt.x = 0;
+    stepBall(dt);
+    keys.forEach(k => {
+      const K = k === 'x' ? 45 : 170, C = k === 'x' ? 10 : 17;
+      vel[k] += ((tgt[k] - cur[k]) * K - vel[k] * C) * dt;
+      cur[k] += vel[k] * dt;
+    });
+
+    const c = cur, a = actionOffset();
+    if (t > nextBlink && face() !== 'sleep') { blinkT = t; nextBlink = t + 2.5 + Math.random() * 3; }
+    const bp = (t - blinkT) / 0.16, blink = bp >= 0 && bp < 1 ? 1 - 0.9 * Math.sin(Math.PI * bp) : 1;
+    const breathe = 0.015 * Math.sin(t * 2.1);
+    const bob = c.mTalk * -3 * Math.abs(Math.sin(t * 7)) + c.bounce * -7 * Math.abs(Math.sin(t * 5.5)) + c.groove * -5 * Math.abs(Math.sin(t * 4));
+    const tilt = c.tilt + c.groove * 5 * Math.sin(t * 2);
+    const sy = c.sy + breathe + a.s, sx = 1 + (1 - sy) * 0.6, shake = c.shake * Math.sin(t * 53) * 1.6;
+
+    el.root.setAttribute('transform', `translate(${c.x + shake} ${a.y + bob}) rotate(${tilt} 150 258) rotate(${a.r} 150 160) translate(150 258) scale(${sx} ${sy}) translate(-150 -258)`);
+    el.tail.setAttribute('transform', `rotate(${c.tailAmp * Math.sin(t * c.tailSpd)} 118 250)`);
+    el.tail.setAttribute('stroke-width', c.tailW);
+    el.earL.setAttribute('transform', `translate(120 92) rotate(${c.earL}) scale(${c.earS}) translate(-120 -92)`);
+    el.earR.setAttribute('transform', `translate(180 92) rotate(${c.earR}) scale(${c.earS}) translate(-180 -92)`);
+    const eyeY = Math.max(0.04, c.eyeR * c.open * blink);
+    el.eyeL.setAttribute('transform', `translate(127 116) scale(${c.eyeR} ${eyeY})`);
+    el.eyeR.setAttribute('transform', `translate(173 116) scale(${c.eyeR} ${eyeY})`);
+    const hx = (ball ? 0 : 4) + c.px, hy = (ball ? 0 : -4) + c.py;
+    [el.hlL, el.hlR].forEach(h => { h.setAttribute('cx', hx); h.setAttribute('cy', hy); });
+    el.eyesOpen.setAttribute('opacity', clamp01((1 - c.happy) * (1 - c.closed)));
+    el.eyesHappy.setAttribute('opacity', clamp01(c.happy * (1 - c.closed)));
+    el.eyesClosed.setAttribute('opacity', clamp01(c.closed));
+    el.browL.setAttribute('transform', `rotate(${c.browA} 127 95)`);
+    el.browR.setAttribute('transform', `rotate(${-c.browA} 173 95)`);
+    el.browL.setAttribute('opacity', clamp01(c.browO));
+    el.browR.setAttribute('opacity', clamp01(c.browO));
+    ['mW', 'mFrown', 'mSmirk', 'mO'].forEach(m => el[m].setAttribute('opacity', clamp01(c[m])));
+    el.mTalk.setAttribute('opacity', clamp01(c.mTalk));
+    el.mTalk.setAttribute('transform', `translate(150 141) scale(1 ${0.35 + 1.1 * Math.abs(Math.sin(t * 13))}) translate(-150 -141)`);
+    const tearP = (t * 0.9) % 1;
+    el.tear.setAttribute('transform', `translate(0 ${tearP * 22})`);
+    el.tear.setAttribute('opacity', clamp01(c.tear) * (1 - tearP));
+    [el.z1, el.z2, el.z3].forEach((z, i) => {
+      const p = (t * 0.45 + i / 3) % 1;
+      z.setAttribute('transform', `translate(${p * 22} ${-p * 40})`);
+      z.setAttribute('opacity', clamp01(c.zzz) * Math.sin(Math.PI * p));
+    });
+    el.qm.setAttribute('opacity', clamp01(c.q));
+    el.qm.setAttribute('transform', `rotate(${8 * Math.sin(t * 3)} 216 62)`);
+    [el.h1, el.h2].forEach((h, i) => {
+      const p = (t * 0.5 + i / 2) % 1;
+      h.setAttribute('transform', `translate(${200 + i * 18 + 6 * Math.sin(t * 3 + i)} ${80 - p * 55}) scale(${1.1 + 0.3 * i})`);
+      h.setAttribute('opacity', clamp01(c.hearts) * Math.sin(Math.PI * p));
+    });
+    el.anger.setAttribute('opacity', clamp01(c.anger));
+    el.anger.setAttribute('transform', `translate(204 72) scale(${1 + 0.15 * Math.sin(t * 12)})`);
+    el.disp.setAttribute('scale', 6 + c.anger * 3);
+    requestAnimationFrame(frame);
+  }
+
+  // Called from Python.
+  window.nori = {
+    setActivity(name) {
+      const wasTalking = activity === 'talk';
+      activity = name;
+      document.body.classList.toggle('talking', name === 'talk');
+      if (name === 'listen' && el.captionText.textContent === 'waking up...') showCaption('');
+      if (wasTalking && name !== 'talk') clearTimeout(captionTimer), captionTimer = setTimeout(() => el.caption.style.opacity = 0, 4000);
+      retarget();
+    },
+    setMood(name) {
+      mood = EMOTIONS[name] ? name : 'neutral';
+      moodSetAt = t;
+      retarget();
+    },
+    play(name) {
+      if (['backflip', 'spin', 'hop'].includes(name)) action = {name, t0:t};
+    },
+    say(text) { showCaption(text); },
+    heard(text) { showCaption('you: ' + text, true); },
+    giveBall() {
+      ball = {x:275, y:-20, vx:-160, vy:0, rot:0};
+      el.ballG.setAttribute('opacity', 1);
+      retarget();
+    },
+    takeBall() {
+      if (!ball) return;
+      ball = null;
+      el.ballG.setAttribute('opacity', 0);
+      react('sad', 2.5);
+    },
+  };
+
+  retarget();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

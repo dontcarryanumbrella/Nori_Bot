@@ -1,0 +1,22 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Personal data Nori writes about you
+botmodel/user_memory.txt
+
+# Your own songs for wait mode (copyrighted, and large)
+botmodel/music/*
+!botmodel/music/README.txt
+
+# Scratch output
+voice_samples/
+
+# Local editor / agent settings
+.claude/
+.vscode/
+.idea/
